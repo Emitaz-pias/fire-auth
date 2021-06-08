@@ -14,17 +14,20 @@ function App() {
     photo: "",
     email: "",
   });
-  const handleSignOut = ()=>{
-    firebase.auth().signOut()
-    .then((res)=>{
-      const signedOutUser = {
-        isSignedIn:false,
-        
-      }
-      setUser(signedOutUser)
-    })
-    .catch((err)=>{console.log(err)})
-  }
+  const handleSignOut = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then((res) => {
+        const signedOutUser = {
+          isSignedIn: false,
+        };
+        setUser(signedOutUser);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   const handleSignIn = () => {
     firebase
       .auth()
@@ -43,7 +46,12 @@ function App() {
         console.log(error.message);
       });
   };
+const handleBlur = (event) => {
+      console.log(event.target.name,event.target.value);
+}
+const handleSubmit=()=>{
   
+}
   return (
     <div className="App">
       {user.isSignedIn ? (
@@ -59,6 +67,14 @@ function App() {
           <h5>{user.email}</h5>
         </div>
       )}
+      <h1>Our own authentication</h1>
+      <form action="">
+        <input type="text" placeholder="email" onBlur={handleBlur} name="email" />
+        <br />
+        <input type="password" placeholder="password" onBlur={handleBlur} name="password" />
+        <br />
+        <input type="submit" onSubmit={handleSubmit} name="" id="" />
+      </form>
     </div>
   );
 }

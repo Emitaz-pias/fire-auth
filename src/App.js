@@ -46,22 +46,40 @@ function App() {
         console.log(error.message);
       });
   };
-const handleBlur = (event) => {
-      console.log(event.target.name,event.target.value);
-    if(event.target.name ==="email"){
-      const isValid = /\S+@\S+\.\S+/.test(event.target.value);
-      console.log(isValid)
+  const handleBlur = (event) => {
+    let isFormValid = true;
+    if (event.target.name === "email") {
+      isFormValid = /\S+@\S+\.\S+/.test(event.target.value);
     }
-    if(event.target.name ==="password"){
-      const isStrong = event.target.value.length >6
-      const containsNumbers =/\d{1}/.test(event.target.value)
-      console.log(isStrong&&containsNumbers)
+    if (event.target.name === "password") {
+      const isStrong = event.target.value.length > 6;
+      const containsNumbers = /\d{1}/.test(event.target.value);
+      isFormValid = containsNumbers && isStrong;
     }
-
-}
-const handleSubmit=()=>{
-
-}
+    if (isFormValid) {
+      const newUserInfo = { ...user };
+      newUserInfo[event.target.name] = event.target.value;
+      setUser(newUserInfo);
+    }
+  };
+  const handleSubmit = (e) => {
+    if (user.email && user.password) {
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(user.email, user.password)
+        .then((res) => {
+          
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          const newUserInfo = {...user}
+          newUserInfo.error = errorMessage
+          setUser(newUserInfo)
+        });
+    }
+    e.preventDefault();
+  };
   return (
     <div className="App">
       {user.isSignedIn ? (
@@ -78,13 +96,34 @@ const handleSubmit=()=>{
         </div>
       )}
       <h1>Our own authentication</h1>
-      <form action="">
-        <input type="text" placeholder="email" onBlur={handleBlur} name="email" />
+      <h4>Name:{user.name}</h4>
+      <h4>Email:{user.email}</h4>
+      <h4>Password:{user.password}</h4>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          onBlur={handleBlur}
+          placeholder="Enter your Name"
+          name="name"
+        />
         <br />
-        <input type="password" placeholder="password" onBlur={handleBlur} name="password" />
+        <input
+          type="text"
+          placeholder="email"
+          onBlur={handleBlur}
+          name="email"
+        />
         <br />
-        <input type="submit" onSubmit={handleSubmit} name="" id="" />
+        <input
+          type="password"
+          placeholder="password"
+          onBlur={handleBlur}
+          name="password"
+        />
+        <br />
+        <input type="submit" name="" id="" />
       </form>
+      <h4 style={{color:"red"}} >{user.error}</h4>
     </div>
   );
 }

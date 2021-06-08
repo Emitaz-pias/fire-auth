@@ -48,9 +48,19 @@ function App() {
   };
 const handleBlur = (event) => {
       console.log(event.target.name,event.target.value);
+    if(event.target.name ==="email"){
+      const isValid = /\S+@\S+\.\S+/.test(event.target.value);
+      console.log(isValid)
+    }
+    if(event.target.name ==="password"){
+      const isStrong = event.target.value.length >6
+      const containsNumbers =/\d{1}/.test(event.target.value)
+      console.log(isStrong&&containsNumbers)
+    }
+
 }
 const handleSubmit=()=>{
-  
+
 }
   return (
     <div className="App">

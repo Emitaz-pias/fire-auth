@@ -8,6 +8,7 @@ firebase.initializeApp(firebaseConfig);
 
 function App() {
   const provider = new firebase.auth.GoogleAuthProvider();
+  const fbProvider = new firebase.auth.FacebookAuthProvider();
   const [newUser, setNewUser] = useState(false);
   const [user, setUser] = useState({
     isSignedIn: false,
@@ -73,7 +74,7 @@ function App() {
           newUserInfo.error = " ";
           newUserInfo.success = true;
           setUser(newUserInfo);
-          updateUserName(user.name)
+          updateUserName(user.name);
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -93,6 +94,7 @@ function App() {
           newUserInfo.error = " ";
           newUserInfo.success = true;
           setUser(newUserInfo);
+          console.log(user);
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -105,16 +107,46 @@ function App() {
     }
     e.preventDefault();
   };
-  const updateUserName=name =>{
+  const updateUserName = (name) => {
     var user = firebase.auth().currentUser;
-user.updateProfile({
-  displayName: name
-}).then(function(res) {
-console.log(res.user.name)
-}).catch(function(error) {
-  console.log(error)
-});
-  }
+    user
+      .updateProfile({
+        displayName: name,
+      })
+      .then(function (res) {})
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+  const handleFbSignIn = () => {
+    firebase
+  .auth()
+  .signInWithPopup(fbProvider)
+  .then((result) => {
+    /** @type {firebase.auth.OAuthCredential} */
+   const credential = result.credential;
+
+    // The signed-in user info.
+    const user = result.user;
+    console.log("facebook user:", user)
+    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+    var accessToken = credential.accessToken;
+
+    // ...
+  })
+  .catch((error) => {
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    console.log(errorMessage)
+    // The email of the user's account used.
+    var email = error.email;
+    // The firebase.auth.AuthCredential type that was used.
+    var credential = error.credential;
+
+    // ...
+  });
+  };
   return (
     <div className="App">
       {user.isSignedIn ? (
@@ -134,6 +166,8 @@ console.log(res.user.name)
       <h4>Name:{user.name}</h4>
       <h4>Email:{user.email}</h4>
       <h4>Password:{user.password}</h4>
+      <button onClick={() => handleFbSignIn()}>sign in with facebook</button>
+      <br />
       <input
         type="checkbox"
         name="newUser"
@@ -165,7 +199,12 @@ console.log(res.user.name)
           name="password"
         />
         <br />
-        <input type="submit" value={newUser?"Sign Up":"Sign In"} name="" id="" />
+        <input
+          type="submit"
+          value={newUser ? "Sign Up" : "Sign In"}
+          name=""
+          id=""
+        />
       </form>
       {user.success ? (
         <h4 style={{ color: "green" }}>

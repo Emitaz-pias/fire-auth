@@ -8,6 +8,7 @@ firebase.initializeApp(firebaseConfig);
 
 function App() {
   const provider = new firebase.auth.GoogleAuthProvider();
+  const [newUser, setNewUser] = useState(false);
   const [user, setUser] = useState({
     isSignedIn: false,
     name: "",
@@ -63,23 +64,57 @@ function App() {
     }
   };
   const handleSubmit = (e) => {
-    if (user.email && user.password) {
+    if (newUser && user.email && user.password) {
       firebase
         .auth()
         .createUserWithEmailAndPassword(user.email, user.password)
         .then((res) => {
-          
+          const newUserInfo = { ...user };
+          newUserInfo.error = " ";
+          newUserInfo.success = true;
+          setUser(newUserInfo);
+          updateUserName(user.name)
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          const newUserInfo = {...user}
-          newUserInfo.error = errorMessage
-          setUser(newUserInfo)
+          const newUserInfo = { ...user };
+          newUserInfo.error = errorMessage;
+          newUserInfo.success = false;
+          setUser(newUserInfo);
+        });
+    }
+    if (!newUser && user.email && user.password) {
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(user.email, user.password)
+        .then((res) => {
+          const newUserInfo = { ...user };
+          newUserInfo.error = " ";
+          newUserInfo.success = true;
+          setUser(newUserInfo);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          const newUserInfo = { ...user };
+          newUserInfo.error = errorMessage;
+          newUserInfo.success = false;
+          setUser(newUserInfo);
         });
     }
     e.preventDefault();
   };
+  const updateUserName=name =>{
+    var user = firebase.auth().currentUser;
+user.updateProfile({
+  displayName: name
+}).then(function(res) {
+console.log(res.user.name)
+}).catch(function(error) {
+  console.log(error)
+});
+  }
   return (
     <div className="App">
       {user.isSignedIn ? (
@@ -99,13 +134,22 @@ function App() {
       <h4>Name:{user.name}</h4>
       <h4>Email:{user.email}</h4>
       <h4>Password:{user.password}</h4>
+      <input
+        type="checkbox"
+        name="newUser"
+        onChange={() => setNewUser(!newUser)}
+        id=""
+      />
+      <label htmlFor="newUser">New User</label>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          onBlur={handleBlur}
-          placeholder="Enter your Name"
-          name="name"
-        />
+        {newUser && (
+          <input
+            type="text"
+            onBlur={handleBlur}
+            placeholder="Enter your Name"
+            name="name"
+          />
+        )}
         <br />
         <input
           type="text"
@@ -121,9 +165,15 @@ function App() {
           name="password"
         />
         <br />
-        <input type="submit" name="" id="" />
+        <input type="submit" value={newUser?"Sign Up":"Sign In"} name="" id="" />
       </form>
-      <h4 style={{color:"red"}} >{user.error}</h4>
+      {user.success ? (
+        <h4 style={{ color: "green" }}>
+          User {newUser ? "created " : "signed in"}successfully
+        </h4>
+      ) : (
+        <h4 style={{ color: "red" }}>{user.error}</h4>
+      )}
     </div>
   );
 }
